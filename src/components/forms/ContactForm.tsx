@@ -485,7 +485,7 @@ export function ContactForm({
             ) : (
               <>
                 <MessageCircle className="w-4 h-4 fill-black" />
-                <span>Submit & Send on WhatsApp (9995272083)</span>
+                <span>Submit & Send on WhatsApp</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </>
             )}
