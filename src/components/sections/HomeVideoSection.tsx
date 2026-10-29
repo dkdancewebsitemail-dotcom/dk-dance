@@ -17,6 +17,9 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
     (a, b) => (Number(a.displayOrder) || 1) - (Number(b.displayOrder) || 1)
   );
 
+  // Maximum 3 videos displayed on the home page showcase
+  const displayVideos = validVideos.slice(0, 3);
+
   // Lightbox Modal state
   const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -43,7 +46,7 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
   };
 
   const activeVideo =
-    fullscreenIndex !== null ? validVideos[fullscreenIndex] : null;
+    fullscreenIndex !== null ? displayVideos[fullscreenIndex] : null;
   const activeEmbedUrl = activeVideo ? getEmbedUrl(activeVideo.url) : null;
 
   const handleOpen = (index: number) => {
@@ -57,23 +60,23 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
   const handleNext = useCallback(
     (e?: React.MouseEvent) => {
       e?.stopPropagation();
-      if (fullscreenIndex === null || validVideos.length === 0) return;
+      if (fullscreenIndex === null || displayVideos.length === 0) return;
       setFullscreenIndex((prev) =>
-        prev !== null ? (prev + 1) % validVideos.length : 0
+        prev !== null ? (prev + 1) % displayVideos.length : 0
       );
     },
-    [fullscreenIndex, validVideos.length]
+    [fullscreenIndex, displayVideos.length]
   );
 
   const handlePrev = useCallback(
     (e?: React.MouseEvent) => {
       e?.stopPropagation();
-      if (fullscreenIndex === null || validVideos.length === 0) return;
+      if (fullscreenIndex === null || displayVideos.length === 0) return;
       setFullscreenIndex((prev) =>
-        prev !== null ? (prev - 1 + validVideos.length) % validVideos.length : 0
+        prev !== null ? (prev - 1 + displayVideos.length) % displayVideos.length : 0
       );
     },
-    [fullscreenIndex, validVideos.length]
+    [fullscreenIndex, displayVideos.length]
   );
 
   // Keyboard navigation
@@ -95,7 +98,7 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
     };
   }, [fullscreenIndex, handleClose, handleNext, handlePrev]);
 
-  if (validVideos.length === 0) {
+  if (displayVideos.length === 0) {
     return null;
   }
 
@@ -136,7 +139,7 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
         </div>
 
         {/* Left Navigation Arrow */}
-        {validVideos.length > 1 && (
+        {displayVideos.length > 1 && (
           <button
             onClick={handlePrev}
             aria-label="Previous video"
@@ -147,7 +150,7 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
         )}
 
         {/* Right Navigation Arrow */}
-        {validVideos.length > 1 && (
+        {displayVideos.length > 1 && (
           <button
             onClick={handleNext}
             aria-label="Next video"
@@ -189,7 +192,7 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
           onClick={(e) => e.stopPropagation()}
         >
           <span>
-            {fullscreenIndex + 1} / {validVideos.length}
+            {fullscreenIndex + 1} / {displayVideos.length}
           </span>
           <button
             onClick={handleClose}
@@ -223,18 +226,18 @@ export function HomeVideoSection({ videos = [] }: HomeVideoSectionProps) {
 
           <FadeUp delay={0.15}>
             <Link
-              href="/gallery"
+              href="/videos"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/[0.04] border border-white/[0.1] text-neutral-300 hover:text-white hover:border-dk-yellow/50 font-mono text-xs uppercase tracking-widest transition-all duration-300 w-fit hover:scale-105 active:scale-95 group"
             >
-              <span>Full Archive</span>
+              <span>More Videos</span>
               <ArrowRight className="w-3.5 h-3.5 text-dk-yellow transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </FadeUp>
         </div>
 
-        {/* Square Boxes with Sharp Edges & Video Info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-          {validVideos.map((video, idx) => {
+        {/* Square Boxes with Sharp Edges & Video Info - Maximum 3 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {displayVideos.map((video, idx) => {
             const thumb =
               video.thumbnailUrl || "/images/styles/contemporary.jpg";
 

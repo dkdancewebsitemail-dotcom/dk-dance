@@ -137,6 +137,7 @@ export function Footer({ settings }: { settings?: SiteSettings }) {
                 { href: "/dance-styles", label: "Dance Styles" },
                 { href: "/branches", label: "Branches" },
                 { href: "/gallery", label: "Gallery" },
+                { href: "/videos", label: "Videos Archive" },
                 { href: "/reviews", label: "Google Reviews" },
                 { href: "/online-classes", label: "Online Classes" },
                 { href: "/rules", label: "Rules & Regulations" },
