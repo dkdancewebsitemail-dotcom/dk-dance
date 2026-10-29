@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  ArrowRight,
+  MessageCircle,
+  ExternalLink,
+} from "lucide-react";
 import { Branch, DanceStyle } from "@/types";
 import { DANCE_STYLES } from "@/lib/constants";
 import { useToast } from "@/context/ToastContext";
@@ -11,6 +18,46 @@ interface ContactFormProps {
   danceStyles?: DanceStyle[];
   defaultBranch?: string;
   defaultMode?: "offline" | "online";
+}
+
+const TARGET_WHATSAPP_NUMBER = "919995272083";
+
+function generateWhatsAppUrl(data: {
+  name: string;
+  phone: string;
+  email: string;
+  age?: string;
+  mode: "offline" | "online";
+  branch: string;
+  danceStyle: string;
+  message?: string;
+}): string {
+  const modeText =
+    data.mode === "online" ? "Online Digital Classes" : "Studio Offline Classes";
+
+  const messageLines = [
+    "🌟 *NEW ADMISSION ENQUIRY - DK DANCE COMPANY*",
+    "──────────────────────────",
+    `👤 *Student / Parent Name:* ${data.name.trim()}`,
+    `📞 *Phone / WhatsApp:* ${data.phone.trim()}`,
+    `✉️ *Email Address:* ${data.email.trim()}`,
+    ...(data.age && data.age.trim() ? [`🎂 *Student Age:* ${data.age.trim()}`] : []),
+    `🎓 *Training Mode:* ${modeText}`,
+    `📍 *Preferred Branch:* ${data.branch}`,
+    `💃 *Dance Style:* ${data.danceStyle}`,
+    ...(data.message && data.message.trim()
+      ? [
+          "──────────────────────────",
+          `💬 *Message / Requirements:*`,
+          data.message.trim(),
+        ]
+      : []),
+    "──────────────────────────",
+    "🌐 _Submitted via DK Dance Company Website Form_",
+  ];
+
+  const fullMessage = messageLines.join("\n");
+  return `https://wa.me/${TARGET_WHATSAPP_NUMBER}?text=${encodeURIComponent(fullMessage)}`;
 }
 
 export function ContactForm({
@@ -63,6 +110,8 @@ export function ContactForm({
 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [whatsappRedirectUrl, setWhatsappRedirectUrl] = useState<string>("");
+  const [lastSubmitted, setLastSubmitted] = useState<typeof formData | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +127,21 @@ export function ContactForm({
 
     setStatus("loading");
 
+    // 1. Build the WhatsApp URL with all autofilled form details
+    const waUrl = generateWhatsAppUrl(formData);
+    setWhatsappRedirectUrl(waUrl);
+    setLastSubmitted({ ...formData });
+
+    // 2. Open WhatsApp in a new window/tab immediately
+    try {
+      if (typeof window !== "undefined") {
+        window.open(waUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (openErr) {
+      console.warn("Direct WhatsApp popup was blocked by browser:", openErr);
+    }
+
+    // 3. Save enquiry into database so admin retains a lead record
     try {
       const res = await fetch("/api/enquiries", {
         method: "POST",
@@ -85,51 +149,111 @@ export function ContactForm({
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || "Failed to submit enquiry.");
+        const data = await res.json().catch(() => ({}));
+        console.warn("Enquiry DB save warning:", data.error);
       }
-
-      setStatus("success");
-      toast.success("Enquiry received! Director Dhanesh Krishnan or our team will contact you soon.");
-      setFormData({
-        name: "",
-        phone: "",
-        email: "",
-        age: "",
-        branch: defaultBranch || "Kunduparamba",
-        danceStyle: "All Styles / General",
-        mode: defaultMode,
-        message: "",
-        website_hp: "",
-      });
     } catch (err: any) {
-      setStatus("error");
-      const msg = err.message || "An unexpected error occurred. Please try again.";
-      setErrorMessage(msg);
-      toast.error(msg);
+      console.warn("Failed to persist enquiry in DB:", err);
     }
+
+    setStatus("success");
+    toast.success("Enquiry received! Opening WhatsApp (+91 99952 72083)...");
   };
 
   return (
     <div className="rounded-3xl glass-panel border border-white/[0.08] bg-white/[0.02] p-5 sm:p-8 md:p-12 shadow-2xl">
       {status === "success" ? (
-        <div className="py-12 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-dk-yellow/10 text-dk-yellow flex items-center justify-center mb-6 border border-dk-yellow/20">
-            <CheckCircle2 className="w-8 h-8 text-dk-yellow" />
+        <div className="py-6 sm:py-10 text-center flex flex-col items-center max-w-xl mx-auto">
+          {/* Animated WhatsApp Success Icon */}
+          <div className="w-16 h-16 rounded-full bg-[#25D366]/15 text-[#25D366] flex items-center justify-center mb-5 border border-[#25D366]/30 shadow-[0_0_30px_rgba(37,211,102,0.25)]">
+            <CheckCircle2 className="w-8 h-8 text-[#25D366]" />
           </div>
-          <h3 className="text-2xl font-heading font-light uppercase tracking-tight text-white mb-3">
-            Enquiry Received
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#25D366]/10 border border-[#25D366]/25 text-[#25D366] text-[11px] font-mono uppercase tracking-widest mb-3">
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>DETAILS FORMATTED FOR WHATSAPP</span>
+          </div>
+
+          <h3 className="text-2xl sm:text-3xl font-heading font-light uppercase tracking-tight text-white mb-3">
+            Enquiry Registered
           </h3>
-          <p className="text-sm text-neutral-300 max-w-md leading-relaxed mb-8 font-light">
-            Thank you for reaching out to DK Dance Company. Director Dhanesh
-            Krishnan or our branch admissions coordinator will contact you
-            promptly via Phone or WhatsApp.
+
+          <p className="text-sm text-neutral-300 leading-relaxed mb-6 font-light max-w-md">
+            Your admission enquiry has been saved and directed to Director Dhanesh
+            Krishnan via WhatsApp (
+            <strong className="text-white font-mono">+91 99952 72083</strong>
+            ).
           </p>
+
+          {/* Prominent WhatsApp Redirect Button */}
+          {whatsappRedirectUrl && (
+            <a
+              href={whatsappRedirectUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-black font-heading font-semibold text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_0_35px_rgba(37,211,102,0.35)] hover:scale-105 active:scale-95 mb-8"
+            >
+              <MessageCircle className="w-4 h-4 fill-black" />
+              <span>Continue to WhatsApp (+91 99952 72083)</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+            </a>
+          )}
+
+          {/* Autofilled Details Summary Card */}
+          {lastSubmitted && (
+            <div className="w-full text-left p-5 sm:p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs font-mono mb-8 space-y-2.5">
+              <div className="text-[11px] uppercase tracking-wider text-dk-yellow pb-2 border-b border-white/[0.08] flex items-center justify-between">
+                <span>Autofilled Message Preview:</span>
+                <span className="text-neutral-500 font-normal">Desk: 9995272083</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                <span className="text-neutral-400">Name:</span>
+                <span className="text-white font-sans">{lastSubmitted.name}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                <span className="text-neutral-400">Phone:</span>
+                <span className="text-white">{lastSubmitted.phone}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                <span className="text-neutral-400">Email:</span>
+                <span className="text-neutral-300">{lastSubmitted.email}</span>
+              </div>
+              {lastSubmitted.age && (
+                <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                  <span className="text-neutral-400">Age:</span>
+                  <span className="text-white">{lastSubmitted.age}</span>
+                </div>
+              )}
+              <div className="flex justify-between py-1 border-b border-white/[0.04]">
+                <span className="text-neutral-400">Branch:</span>
+                <span className="text-dk-yellow">{lastSubmitted.branch}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-neutral-400">Style & Mode:</span>
+                <span className="text-white">
+                  {lastSubmitted.danceStyle} • {lastSubmitted.mode === "online" ? "Online" : "Studio Offline"}
+                </span>
+              </div>
+            </div>
+          )}
+
           <button
-            onClick={() => setStatus("idle")}
-            className="text-xs font-mono uppercase tracking-widest text-dk-yellow underline hover:text-white transition-colors"
+            onClick={() => {
+              setStatus("idle");
+              setFormData({
+                name: "",
+                phone: "",
+                email: "",
+                age: "",
+                branch: defaultBranch || "Kunduparamba",
+                danceStyle: "All Styles / General",
+                mode: defaultMode,
+                message: "",
+                website_hp: "",
+              });
+            }}
+            className="text-xs font-mono uppercase tracking-widest text-neutral-400 underline underline-offset-4 hover:text-white transition-colors cursor-pointer"
           >
             Submit Another Enquiry
           </button>
@@ -259,7 +383,7 @@ export function ContactForm({
                     mode: e.target.value as "offline" | "online",
                   })
                 }
-                className="w-full rounded-2xl bg-neutral-900 border border-white/[0.08] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-dk-yellow/50 transition-all duration-300 font-light"
+                className="w-full rounded-2xl bg-neutral-900 border border-white/[0.08] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-dk-yellow/50 transition-all duration-300 font-light cursor-pointer"
               >
                 <option value="offline">Studio Offline Classes</option>
                 <option value="online">Online Digital Classes</option>
@@ -279,7 +403,7 @@ export function ContactForm({
                 onChange={(e) =>
                   setFormData({ ...formData, branch: e.target.value })
                 }
-                className="w-full rounded-2xl bg-neutral-900 border border-white/[0.08] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-dk-yellow/50 transition-all duration-300 font-light"
+                className="w-full rounded-2xl bg-neutral-900 border border-white/[0.08] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-dk-yellow/50 transition-all duration-300 font-light cursor-pointer"
               >
                 <option value="General / Not Sure">General / Undecided</option>
                 {branches.length > 0 ? (
@@ -315,7 +439,7 @@ export function ContactForm({
               onChange={(e) =>
                 setFormData({ ...formData, danceStyle: e.target.value })
               }
-              className="w-full rounded-2xl bg-neutral-900 border border-white/[0.08] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-dk-yellow/50 transition-all duration-300 font-light"
+              className="w-full rounded-2xl bg-neutral-900 border border-white/[0.08] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-dk-yellow/50 transition-all duration-300 font-light cursor-pointer"
             >
               <option value="All Styles / General">All Styles / General Training</option>
               {effectiveStyles.map((style) => (
@@ -347,19 +471,21 @@ export function ContactForm({
             />
           </div>
 
+          {/* Submit Button with direct WhatsApp Indicator */}
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full py-4 rounded-full bg-white text-black hover:bg-dk-yellow hover:shadow-[0_0_25px_rgba(255,215,0,0.25)] font-heading font-light text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 active:scale-[0.99]"
+            className="w-full py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-black hover:shadow-[0_0_30px_rgba(37,211,102,0.35)] font-heading font-semibold text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2.5 group disabled:opacity-50 active:scale-[0.99] cursor-pointer"
           >
             {status === "loading" ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Submitting Enquiry...</span>
+                <Loader2 className="w-4 h-4 animate-spin text-black" />
+                <span>Redirecting to WhatsApp (+91 99952 72083)...</span>
               </>
             ) : (
               <>
-                <span>Submit Admission Enquiry</span>
+                <MessageCircle className="w-4 h-4 fill-black" />
+                <span>Submit & Send on WhatsApp (9995272083)</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </>
             )}
