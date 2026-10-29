@@ -303,7 +303,6 @@ export function GoogleReviewsSection({
             </FadeUp>
           </div>
 
-          {/* Google Rating Summary & Write Review Button */}
           <FadeUp delay={0.1}>
             <div className="p-6 sm:p-7 rounded-3xl glass-panel border border-white/[0.1] bg-neutral-950/80 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <div className="flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-white/10 pb-4 sm:pb-0 sm:pr-6">
@@ -323,7 +322,6 @@ export function GoogleReviewsSection({
                 </div>
               </div>
 
-              {/* Write a Google Review Button */}
               <a
                 href={WRITE_REVIEW_URL}
                 target="_blank"
