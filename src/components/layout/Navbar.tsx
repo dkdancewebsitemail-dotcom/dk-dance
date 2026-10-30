@@ -9,8 +9,10 @@ import { Menu, X, ArrowLeft, ArrowUpRight } from "lucide-react";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
+  { label: "Classes", href: "/classes" },
   { label: "Styles", href: "/dance-styles" },
   { label: "Branches", href: "/branches" },
+  { label: "Videos", href: "/videos" },
   { label: "Gallery", href: "/gallery" },
   { label: "Reviews", href: "/reviews" },
   { label: "Online", href: "/online-classes" },
@@ -105,7 +107,7 @@ export function Navbar() {
               aria-label="DK Dance Company Homepage"
             >
               <div
-                className={`relative w-36 xs:w-44 sm:w-56 md:w-64 h-9 xs:h-11 sm:h-14 transition-all duration-300 group-hover:scale-[1.03] active:scale-[0.98] ${
+                className={`relative w-44 xs:w-52 sm:w-64 md:w-72 lg:w-80 h-11 xs:h-13 sm:h-16 md:h-18 lg:h-20 transition-all duration-300 group-hover:scale-[1.03] active:scale-[0.98] ${
                   isScrolled
                     ? "filter drop-shadow-[0_0_1px_rgba(255,255,255,0.9)]"
                     : ""

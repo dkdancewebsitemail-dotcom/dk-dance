@@ -3,11 +3,29 @@ import { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FadeUp } from "@/components/ui/Motion";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Privacy Policy | DK Dance Company",
   description:
-    "Privacy Policy of DK Dance Company regarding contact enquiries, student data, and digital services.",
+    "Privacy Policy of DK Dance Company regarding student data, admission enquiries, and website privacy standards across Kozhikode & UK studios.",
+  alternates: {
+    canonical: "/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy | DK Dance Company",
+    description:
+      "Privacy Policy of DK Dance Company regarding student data, admission enquiries, and website data standards.",
+    url: "https://www.dkdancecompany.com/privacy",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy Policy | DK Dance Company",
+    description: "Data privacy and security standards at DK Dance Company.",
+  },
 };
 
 export default function PrivacyPage() {
@@ -16,6 +34,8 @@ export default function PrivacyPage() {
       <Navbar />
       <main className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-24 w-full overflow-x-clip">
         <section className="max-w-4xl mx-auto px-4 sm:px-8 mb-16">
+          <Breadcrumbs items={[{ name: "Privacy Policy" }]} />
+
           <FadeUp>
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />

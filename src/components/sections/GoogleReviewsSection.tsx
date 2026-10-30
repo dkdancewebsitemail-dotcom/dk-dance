@@ -238,7 +238,7 @@ function WriteReviewCardItem({ isMobile = false }: { isMobile?: boolean }) {
           href={WRITE_REVIEW_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-[#4285F4] hover:bg-[#3367D6] text-white text-xs uppercase tracking-wider font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+          className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white hover:bg-neutral-100 text-black text-xs uppercase tracking-wider font-semibold transition-all duration-300 hover:scale-105 active:scale-95 shadow-md"
         >
           <GoogleGLogo className="w-4 h-4" />
           <span>Write a Google Review</span>

@@ -1,17 +1,33 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.dkdancecompany.com";
+  const baseUrl = "https://www.dkdancecompany.com";
 
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/api/"],
+        disallow: [
+          "/admin",
+          "/admin/*",
+          "/api/*",
+          "/*?*token=*",
+          "/*?*session=*",
+        ],
+      },
+      {
+        userAgent: ["Googlebot", "Bingbot", "Applebot"],
+        allow: "/",
+        disallow: ["/admin", "/admin/*", "/api/*"],
+      },
+      {
+        userAgent: ["GPTBot", "PerplexityBot", "ClaudeBot"],
+        allow: "/",
+        disallow: ["/admin", "/admin/*", "/api/*"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }

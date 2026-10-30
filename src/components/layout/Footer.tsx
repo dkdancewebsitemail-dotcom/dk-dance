@@ -134,6 +134,7 @@ export function Footer({ settings }: { settings?: SiteSettings }) {
             <ul className="flex flex-col gap-3 text-sm text-neutral-400">
               {[
                 { href: "/about", label: "About DKDC" },
+                { href: "/classes", label: "Classes & Fees" },
                 { href: "/dance-styles", label: "Dance Styles" },
                 { href: "/branches", label: "Branches" },
                 { href: "/gallery", label: "Gallery" },

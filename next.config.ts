@@ -4,7 +4,7 @@ import path from "path";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
-  outputFileTracingRoot: path.join(__dirname),
+
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
@@ -42,6 +42,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    unoptimized: true,
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 480, 640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -72,6 +73,27 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+  },
+  webpack(config, { isServer }) {
+    if (isServer) {
+      config.plugins.push({
+        apply(compiler: any) {
+          compiler.hooks.afterEmit.tap("EnsurePagesDirPlugin", () => {
+            const fs = require("fs");
+            const serverDir = path.join(process.cwd(), ".next", "server");
+            const pagesDir = path.join(serverDir, "pages");
+            if (!fs.existsSync(pagesDir)) {
+              fs.mkdirSync(pagesDir, { recursive: true });
+            }
+            const pagesManifest = path.join(serverDir, "pages-manifest.json");
+            if (!fs.existsSync(pagesManifest)) {
+              fs.writeFileSync(pagesManifest, "{}");
+            }
+          });
+        },
+      });
+    }
+    return config;
   },
 };
 

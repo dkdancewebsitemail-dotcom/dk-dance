@@ -10,8 +10,10 @@ import {
   Loader2,
   AlertCircle,
   RefreshCw,
+  Crop,
 } from "lucide-react";
 import { uploadFiles } from "@/lib/uploadthing";
+import { ImageCropModal } from "./ImageCropModal";
 
 interface MediaUploaderWithPreviewProps {
   label?: string;
@@ -41,6 +43,7 @@ export function MediaUploaderWithPreview({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [selectedFileSize, setSelectedFileSize] = useState<string | null>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   const effectiveMaxMb = maxSizeMb || (mediaType === "video" ? 50 : 10);
 
@@ -97,7 +100,6 @@ export function MediaUploaderWithPreview({
         : "imageUploader";
 
       // 3. Upload file binaries directly from the browser to UploadThing Cloud Storage
-      // This bypasses the Next.js serverless route and Vercel's strict 4.5 MB request body limit.
       const res = await uploadFiles(endpoint, {
         files: [file],
         headers: () => {
@@ -156,10 +158,66 @@ export function MediaUploaderWithPreview({
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      // Reset input value so re-selecting same file triggers onChange
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    }
+  };
+
+  const handleCropComplete = async (croppedFile: File, previewUrl: string) => {
+    setLocalPreview(previewUrl);
+    setSelectedFileName(croppedFile.name);
+    setSelectedFileSize(formatBytes(croppedFile.size));
+    setUploadError(null);
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const res = await uploadFiles("imageUploader", {
+        files: [croppedFile],
+        headers: () => {
+          const authHeaders: Record<string, string> = {};
+          if (typeof window !== "undefined") {
+            const token = localStorage.getItem("dkdc_token");
+            if (token) {
+              authHeaders.Authorization = `Bearer ${token}`;
+            }
+          }
+          return authHeaders;
+        },
+        onUploadProgress: ({ progress }) => {
+          setUploadProgress(Math.round(progress));
+        },
+      });
+
+      if (!res || res.length === 0) {
+        throw new Error("No response received from UploadThing cloud storage.");
+      }
+
+      const uploaded = res[0];
+      const cloudUrl =
+        uploaded.ufsUrl ||
+        uploaded.url ||
+        (uploaded.serverData as any)?.url ||
+        `https://utfs.io/f/${uploaded.key}`;
+
+      const cloudKey =
+        uploaded.key ||
+        (uploaded.serverData as any)?.key ||
+        "";
+
+      onChange({
+        url: cloudUrl,
+        key: cloudKey,
+        name: croppedFile.name,
+        type: "image",
+      });
+    } catch (err: any) {
+      console.error("Upload of cropped image failed:", err);
+      setUploadError(err.message || "Failed to upload cropped image. Please try again.");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -260,12 +318,22 @@ export function MediaUploaderWithPreview({
                 <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-3 z-10">
                   <button
                     type="button"
+                    onClick={() => setIsCropModalOpen(true)}
+                    disabled={isUploading}
+                    className="px-3 py-1.5 bg-dk-yellow text-black hover:bg-yellow-400 text-xs font-mono uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 disabled:opacity-50 cursor-pointer font-medium"
+                    title="Crop and reposition image"
+                  >
+                    <Crop className="w-3 h-3" />
+                    <span>Crop</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="px-3 py-1.5 bg-white text-black hover:bg-dk-yellow text-xs font-mono uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-1.5 bg-white text-black hover:bg-neutral-200 text-xs font-mono uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw className="w-3 h-3" />
-                    <span>{isVideo ? "Change Video" : "Change Photo"}</span>
+                    <span>Change</span>
                   </button>
                   <button
                     type="button"
@@ -328,6 +396,20 @@ export function MediaUploaderWithPreview({
             </div>
 
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              {/* Crop / Edit Button for Photos */}
+              {!isVideo && (
+                <button
+                  type="button"
+                  onClick={() => setIsCropModalOpen(true)}
+                  disabled={isUploading}
+                  className="px-3 py-1.5 bg-neutral-900 border border-dk-yellow/40 text-dk-yellow hover:bg-dk-yellow hover:text-black text-xs font-mono uppercase tracking-wider transition-all inline-flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer min-h-[36px]"
+                  title="Crop & reposition thumbnail image"
+                >
+                  <Crop className="w-3.5 h-3.5" />
+                  <span>Crop / Edit</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -397,6 +479,17 @@ export function MediaUploaderWithPreview({
             </button>
           </div>
         </div>
+      )}
+
+      {/* Image Crop Modal */}
+      {isCropModalOpen && displayUrl && (
+        <ImageCropModal
+          isOpen={isCropModalOpen}
+          imageUrl={displayUrl}
+          onClose={() => setIsCropModalOpen(false)}
+          onCropComplete={handleCropComplete}
+          defaultAspect={16 / 9}
+        />
       )}
     </div>
   );

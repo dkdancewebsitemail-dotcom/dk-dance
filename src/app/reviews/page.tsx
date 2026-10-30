@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { FadeUp } from "@/components/ui/Motion";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import {
   GoogleReviewsSection,
   GoogleGLogo,
@@ -11,13 +12,39 @@ import {
   WRITE_REVIEW_URL,
 } from "@/components/sections/GoogleReviewsSection";
 import { ExternalLink, ShieldCheck } from "lucide-react";
-
 import { getReviews, getSiteSettings } from "@/lib/db-services";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
-  title: "Google Reviews & Testimonials | DK Dance Company",
+  title: "Student Reviews & Google Testimonials | DK Dance Company",
   description:
-    "Read verified Google reviews and student experiences from dancers and parents across DK Dance Company branches in Kozhikode and abroad.",
+    "Read verified Google reviews and student experiences from dancers and parents across DK Dance Company branches in Kozhikode and abroad. Rated 5.0 on Google.",
+  alternates: {
+    canonical: "/reviews",
+  },
+  openGraph: {
+    title: "Student Reviews & Google Testimonials | DK Dance Company",
+    description:
+      "Rated 5.0 on Google by over 140 dancers and parents across Kozhikode, Kerala & Bournemouth, UK.",
+    url: "https://www.dkdancecompany.com/reviews",
+    type: "website",
+    images: [
+      {
+        url: "/images/logo/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "DK Dance Company 5-Star Reviews on Google",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Google Reviews & Testimonials | DK Dance Company",
+    description:
+      "100% authentic student feedback from DK Dance Company dancers.",
+    images: ["/images/logo/logo.png"],
+  },
 };
 
 export default async function ReviewsPage() {
@@ -34,13 +61,50 @@ export default async function ReviewsPage() {
     { stars: 1, percentage: 0, count: "0" },
   ];
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.dkdancecompany.com";
+
+  // AggregateRating & Review structured data
+  const reviewSchema = {
+    "@context": "https://schema.org",
+    "@type": "DanceSchool",
+    name: "DK Dance Company",
+    url: baseUrl,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "5.0",
+      reviewCount: "140",
+      bestRating: "5",
+      worstRating: "1",
+    },
+    review: reviews.slice(0, 5).map((r) => ({
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: r.author,
+      },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating || 5,
+        bestRating: "5",
+      },
+      reviewBody: r.text,
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }}
+      />
       <Navbar />
 
       <main className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-16 w-full overflow-x-clip">
         {/* Editorial Page Header */}
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-16 sm:mb-20">
+          <Breadcrumbs items={[{ name: "Reviews" }]} />
+
           <FadeUp>
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md mb-6">
               <GoogleGLogo className="w-4 h-4" />
@@ -50,7 +114,10 @@ export default async function ReviewsPage() {
             </div>
 
             <h1 className="text-4xl xs:text-5xl sm:text-7xl lg:text-8xl font-heading font-extralight sm:font-thin uppercase tracking-tight leading-[0.9] text-white max-w-4xl mb-8">
-              Google Reviews
+              <span className="block text-dk-yellow text-xs sm:text-sm font-mono font-normal tracking-widest mb-2">
+                VERIFIED STUDENT FEEDBACK
+              </span>
+              Google Reviews & Testimonials
             </h1>
 
             <p className="text-xl sm:text-2xl text-neutral-300 font-light max-w-3xl leading-relaxed mb-12">
@@ -113,7 +180,7 @@ export default async function ReviewsPage() {
                   href={WRITE_REVIEW_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-[#4285F4] hover:bg-[#3367D6] text-white text-xs uppercase tracking-wider font-medium transition-all duration-300 active:scale-95 shadow-[0_4px_25px_rgba(66,133,244,0.4)]"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-white hover:bg-neutral-100 text-black text-xs uppercase tracking-wider font-semibold transition-all duration-300 hover:scale-105 active:scale-95 shadow-md"
                 >
                   <GoogleGLogo className="w-4 h-4" />
                   <span>Write a Google Review</span>
@@ -129,7 +196,7 @@ export default async function ReviewsPage() {
       </main>
 
       <Footer settings={settings} />
-      <WhatsAppButton variant="floating" phone={settings.contact.whatsapp} />
+      <WhatsAppButton variant="floating" phone={settings?.contact?.whatsapp} />
     </>
   );
 }

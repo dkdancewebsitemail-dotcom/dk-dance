@@ -6,12 +6,40 @@ import { Footer } from "@/components/layout/Footer";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { FadeUp } from "@/components/ui/Motion";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { getBranches, getSiteSettings, getDanceStyles } from "@/lib/db-services";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Contact & Admissions | DK Dance Company Kozhikode & UK",
   description:
     "Contact DK Dance Company head office in Kozhikode or Bournemouth UK. Enquire about admissions, workshop bookings, and choreography projects with Director Dhanesh Krishnan.",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact & Admissions | DK Dance Company Kozhikode & UK",
+    description:
+      "Get in touch with DK Dance Company for dance batch admissions, audition dates, and choreography enquiries in Kerala & the UK.",
+    url: "https://www.dkdancecompany.com/contact",
+    type: "website",
+    images: [
+      {
+        url: "/images/logo/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Contact DK Dance Company Admissions",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact & Admissions | DK Dance Company",
+    description:
+      "Admissions and inquiries for DK Dance Company studios in Kozhikode & UK.",
+    images: ["/images/logo/logo.png"],
+  },
 };
 
 export default async function ContactPage() {
@@ -21,12 +49,48 @@ export default async function ContactPage() {
     getDanceStyles(true),
   ]);
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.dkdancecompany.com";
+
+  const contactSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: "Contact DK Dance Company",
+    url: `${baseUrl}/contact`,
+    mainEntity: {
+      "@type": "DanceSchool",
+      name: "DK Dance Company",
+      url: baseUrl,
+      telephone: settings.contact.phone,
+      email: settings.contact.email,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: settings.contact.address,
+        addressLocality: "Kozhikode",
+        addressRegion: "Kerala",
+        addressCountry: "IN",
+      },
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: settings.contact.phone,
+        contactType: "admissions desk",
+        availableLanguage: ["English", "Malayalam", "Hindi"],
+      },
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactSchema) }}
+      />
       <Navbar />
+
       <main className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-24 w-full overflow-x-clip">
-        
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-16">
+          <Breadcrumbs items={[{ name: "Contact & Admissions" }]} />
+
           <FadeUp>
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />
@@ -35,6 +99,9 @@ export default async function ContactPage() {
               </span>
             </div>
             <h1 className="text-4xl xs:text-5xl sm:text-7xl lg:text-8xl font-heading font-extralight sm:font-thin uppercase tracking-tight leading-[0.9] text-white max-w-4xl mb-8">
+              <span className="block text-dk-yellow text-xs sm:text-sm font-mono font-normal tracking-widest mb-2">
+                DK DANCE COMPANY ADMISSIONS
+              </span>
               Contact Us
             </h1>
             <p className="text-xl sm:text-2xl text-neutral-300 font-light max-w-3xl leading-relaxed">

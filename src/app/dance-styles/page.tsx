@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { FadeUp, RevealImage } from "@/components/ui/Motion";
 import { Button } from "@/components/ui/Button";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { DANCE_STYLES, SPECIAL_TRAINING_MODULES } from "@/lib/constants";
 import { getDanceStyles, getCurriculumModules } from "@/lib/db-services";
 import { ExpandableText } from "@/components/ui/ExpandableText";
@@ -13,9 +14,34 @@ import { ExpandableText } from "@/components/ui/ExpandableText";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Dance Styles & Special Training | DK Dance Company",
+  title: "Dance Styles & Curriculum | Bollywood, Hip-Hop, Contemporary | DKDC",
   description:
-    "Explore dance styles offered by DK Dance Company: Bollywood, Hip-Hop, Contemporary, Lyrical, Western, and Freestyle dance, along with specialized conditioning and acrobatics.",
+    "Explore professional dance styles at DK Dance Company: Bollywood, Hip-Hop, Contemporary, Lyrical, Western, and Freestyle dance, along with acrobatics and flexibility training.",
+  alternates: {
+    canonical: "/dance-styles",
+  },
+  openGraph: {
+    title: "Dance Styles & Curriculum | Bollywood, Hip-Hop, Contemporary | DKDC",
+    description:
+      "Master authentic urban, classical-contemporary, and cinematic dance forms under structured curriculum in Kozhikode & UK.",
+    url: "https://www.dkdancecompany.com/dance-styles",
+    type: "website",
+    images: [
+      {
+        url: "/images/styles/contemporary.jpg",
+        width: 1200,
+        height: 630,
+        alt: "DK Dance Company Dance Styles & Training",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dance Styles & Curriculum | DK Dance Company",
+    description:
+      "Bollywood, Hip-Hop, Contemporary, Lyrical, and Western dance training.",
+    images: ["/images/styles/contemporary.jpg"],
+  },
 };
 
 export default async function DanceStylesPage() {
@@ -31,12 +57,41 @@ export default async function DanceStylesPage() {
     (a: any, b: any) => (Number(a.displayOrder) || 1) - (Number(b.displayOrder) || 1)
   );
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.dkdancecompany.com";
+
+  const stylesSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Dance Styles Offered by DK Dance Company",
+    itemListElement: styles.map((s, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      item: {
+        "@type": "Course",
+        name: `${s.name} Classes`,
+        description: s.description,
+        provider: {
+          "@type": "DanceSchool",
+          name: "DK Dance Company",
+          url: baseUrl,
+        },
+      },
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(stylesSchema) }}
+      />
       <Navbar />
+
       <main className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-24 w-full overflow-x-clip">
-        
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-24">
+          <Breadcrumbs items={[{ name: "Dance Styles" }]} />
+
           <FadeUp>
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />
@@ -45,7 +100,10 @@ export default async function DanceStylesPage() {
               </span>
             </div>
             <h1 className="text-4xl xs:text-5xl sm:text-7xl lg:text-8xl font-heading font-extralight sm:font-thin uppercase tracking-tight leading-[0.9] text-white max-w-4xl mb-8">
-              Dance Styles
+              <span className="block text-dk-yellow text-xs sm:text-sm font-mono font-normal tracking-widest mb-2">
+                DK DANCE COMPANY CURRICULUM
+              </span>
+              Dance Styles & Special Training
             </h1>
             <p className="text-xl sm:text-2xl text-neutral-300 font-light max-w-3xl leading-relaxed">
               We teach diverse international and contemporary dance vocabularies,
@@ -77,7 +135,7 @@ export default async function DanceStylesPage() {
                   <RevealImage className="w-full h-full relative">
                     <Image
                       src={style.image}
-                      alt={style.name}
+                      alt={`DK Dance Company ${style.name} training class in Kozhikode`}
                       fill
                       className="object-cover object-center transition-all duration-700 ease-out"
                       sizes="(max-width: 1024px) 100vw, 50vw"
@@ -198,7 +256,6 @@ export default async function DanceStylesPage() {
           </div>
         </section>
 
-        
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-20 text-center">
           <FadeUp>
             <div className="p-10 sm:p-16 rounded-3xl glass-panel border border-white/[0.08] bg-white/[0.02] text-center shadow-2xl relative overflow-hidden">

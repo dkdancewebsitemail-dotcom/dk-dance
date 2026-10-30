@@ -25,6 +25,15 @@ function getJwtSecretKey(): Uint8Array | null {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Domain Canonicalization (Redirect apex domain dkdancecompany.com to canonical www.dkdancecompany.com)
+  const host = req.headers.get("host") || "";
+  if (process.env.NODE_ENV === "production" && host === "dkdancecompany.com") {
+    const url = req.nextUrl.clone();
+    url.host = "www.dkdancecompany.com";
+    url.protocol = "https:";
+    return NextResponse.redirect(url, 301);
+  }
+
   // Clone headers to inject security headers
   const response = NextResponse.next();
 
