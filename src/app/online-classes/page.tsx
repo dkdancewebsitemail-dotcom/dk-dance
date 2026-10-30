@@ -7,12 +7,40 @@ import { Footer } from "@/components/layout/Footer";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { FadeUp, RevealImage } from "@/components/ui/Motion";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { getSiteSettings, getBranches, getDanceStyles } from "@/lib/db-services";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
-  title: "Online Dance Classes Worldwide | DK Dance Company",
+  title: "Online Dance Classes Worldwide | Learn Dance Online | DKDC",
   description:
-    "Learn dance online from anywhere in the world with DK Dance Company. Interactive digital training in technique, rhythm, coordination, and performance skills.",
+    "Join online dance classes from anywhere in the world with DK Dance Company. Interactive live digital training in Bollywood, Contemporary, Hip-Hop, and technique conditioning.",
+  alternates: {
+    canonical: "/online-classes",
+  },
+  openGraph: {
+    title: "Online Dance Classes Worldwide | Learn Dance Online | DKDC",
+    description:
+      "Interactive live digital dance training connecting dancers across the UK, Middle East, Europe, and worldwide with DK Dance Company.",
+    url: "https://www.dkdancecompany.com/online-classes",
+    type: "website",
+    images: [
+      {
+        url: "/images/styles/lyrical.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Online Dance Classes with DK Dance Company",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Online Dance Classes Worldwide | DK Dance Company",
+    description:
+      "Learn dance online with DK Dance Company. Live interactive video coaching.",
+    images: ["/images/styles/lyrical.jpg"],
+  },
 };
 
 export default async function OnlineClassesPage() {
@@ -23,13 +51,39 @@ export default async function OnlineClassesPage() {
   ]);
 
   const onlineData = settings.onlineClasses;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.dkdancecompany.com";
+
+  const onlineCourseSchema = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: "Online Dance Classes Worldwide",
+    description: onlineData.description,
+    provider: {
+      "@type": "DanceSchool",
+      name: "DK Dance Company",
+      url: baseUrl,
+    },
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "online",
+      name: "Global Digital Dance Program",
+      description: "Interactive 2-way live video dance sessions across global time zones.",
+    },
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(onlineCourseSchema) }}
+      />
       <Navbar />
+
       <main className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-24 w-full overflow-x-clip">
-        
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-20">
+          <Breadcrumbs items={[{ name: "Online Classes" }]} />
+
           <FadeUp>
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />
@@ -38,7 +92,10 @@ export default async function OnlineClassesPage() {
               </span>
             </div>
             <h1 className="text-4xl xs:text-5xl sm:text-7xl lg:text-8xl font-heading font-extralight sm:font-thin uppercase tracking-tight leading-[0.9] text-white max-w-4xl mb-8">
-              Online Classes
+              <span className="block text-dk-yellow text-xs sm:text-sm font-mono font-normal tracking-widest mb-2">
+                WORLDWIDE DIGITAL ACADEMY
+              </span>
+              Online Dance Classes
             </h1>
             <p className="text-xl sm:text-2xl text-neutral-300 font-light max-w-3xl leading-relaxed">
               {onlineData.headline}. DK Dance Company brings structured dance
@@ -110,7 +167,7 @@ export default async function OnlineClassesPage() {
               <RevealImage className="w-full h-full relative">
                 <Image
                   src="/images/styles/lyrical.jpg"
-                  alt="Online dance learning with DK Dance Company"
+                  alt="Online dance learning with DK Dance Company live session"
                   fill
                   priority
                   className="object-cover object-center transition-all duration-700 ease-out"

@@ -62,6 +62,7 @@ export function HeroSection({ videoUrl }: HeroSectionProps) {
           {/* Monumental Ultra-Clean High-Fashion Typography */}
           <FadeUp delay={0.2} duration={0.8}>
             <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-heading font-thin tracking-tight leading-[0.92] uppercase mb-6 select-none text-neutral-950">
+              <span className="sr-only">DK Dance Company — Premier Dance Classes in Kozhikode &amp; Kerala. </span>
               <span className="block font-thin tracking-tight text-neutral-950">
                 MOVEMENT.
               </span>

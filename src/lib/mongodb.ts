@@ -1,14 +1,14 @@
-import { MongoClient, Db } from "mongodb";
 import dns from "dns";
 
-// Optimize DNS lookup to prioritize IPv4 to prevent 15-second SRV hangs on dual-stack networks
 try {
   if (typeof (dns as any).setDefaultResultOrder === "function") {
     (dns as any).setDefaultResultOrder("ipv4first");
   }
-} catch {}
+} catch { }
 
-const uri = process.env.MONGODB_URI || "";
+import { MongoClient, Db } from "mongodb";
+
+const rawUri = process.env.MONGODB_URI || "";
 const dbName = process.env.MONGODB_DB_NAME || "dkdancecompany";
 
 interface GlobalWithMongo {
@@ -21,15 +21,31 @@ const globalWithMongo = global as unknown as GlobalWithMongo;
 export function resetDbClient() {
   try {
     if (globalWithMongo._mongoClient) {
-      globalWithMongo._mongoClient.close().catch(() => {});
+      globalWithMongo._mongoClient.close().catch(() => { });
     }
-  } catch {}
+  } catch { }
   globalWithMongo._mongoClient = undefined;
   globalWithMongo._mongoClientPromise = null;
 }
 
+const clientOptions = {
+  maxPoolSize: 20,
+  minPoolSize: 1,
+  maxIdleTimeMS: 60000,
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  retryWrites: true,
+  retryReads: true,
+};
+
+async function createClient(): Promise<MongoClient> {
+  const client = new MongoClient(rawUri, clientOptions);
+  return await client.connect();
+}
+
 async function getConnectedClient(): Promise<MongoClient | null> {
-  if (!uri) {
+  if (!rawUri) {
     return null;
   }
 
@@ -39,22 +55,9 @@ async function getConnectedClient(): Promise<MongoClient | null> {
   }
 
   if (!globalWithMongo._mongoClientPromise) {
-    const client = new MongoClient(uri, {
-      maxPoolSize: 20,
-      minPoolSize: 1,
-      maxIdleTimeMS: 60000,
-      serverSelectionTimeoutMS: 4000,
-      connectTimeoutMS: 4000,
-      socketTimeoutMS: 45000,
-      retryWrites: true,
-      retryReads: true,
-    });
-
-    globalWithMongo._mongoClientPromise = client
-      .connect()
+    globalWithMongo._mongoClientPromise = createClient()
       .then((c) => {
         globalWithMongo._mongoClient = c;
-        // Listen to close / error events on topology to clean up stale references
         c.on("close", () => {
           resetDbClient();
         });

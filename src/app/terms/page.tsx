@@ -3,11 +3,29 @@ import { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FadeUp } from "@/components/ui/Motion";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Terms & Conditions | DK Dance Company",
   description:
-    "Terms of service, admission contracts, and studio terms for DK Dance Company.",
+    "Terms of service, admission contracts, and studio terms for DK Dance Company students and guardians.",
+  alternates: {
+    canonical: "/terms",
+  },
+  openGraph: {
+    title: "Terms & Conditions | DK Dance Company",
+    description:
+      "Terms of service, admission contracts, and studio terms for DK Dance Company.",
+    url: "https://www.dkdancecompany.com/terms",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms & Conditions | DK Dance Company",
+    description: "Terms and conditions for DK Dance Company.",
+  },
 };
 
 export default function TermsPage() {
@@ -16,6 +34,8 @@ export default function TermsPage() {
       <Navbar />
       <main className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-24 w-full overflow-x-clip">
         <section className="max-w-4xl mx-auto px-4 sm:px-8 mb-16">
+          <Breadcrumbs items={[{ name: "Terms & Conditions" }]} />
+
           <FadeUp>
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />

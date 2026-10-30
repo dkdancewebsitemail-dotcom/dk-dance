@@ -5,11 +5,38 @@ import { Footer } from "@/components/layout/Footer";
 import { FadeUp } from "@/components/ui/Motion";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { Button } from "@/components/ui/Button";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Rules & Regulations | DK Dance Company",
+  title: "Studio Rules, Regulations & Attendance Policy | DK Dance Company",
   description:
-    "Institutional rules, studio conduct, attendance guidelines, and fee policies at DK Dance Company.",
+    "Institutional code of conduct, fee remittance rules, attendance guidelines, and studio etiquette for students at DK Dance Company Kozhikode & UK.",
+  alternates: {
+    canonical: "/rules",
+  },
+  openGraph: {
+    title: "Studio Rules, Regulations & Attendance Policy | DK Dance Company",
+    description:
+      "Institutional guidelines, studio decorum, and attendance standards for students at DK Dance Company.",
+    url: "https://www.dkdancecompany.com/rules",
+    type: "website",
+    images: [
+      {
+        url: "/images/logo/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "DK Dance Company Rules & Regulations",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Studio Rules & Regulations | DK Dance Company",
+    description: "Guidelines and code of conduct for DK Dance Company studios.",
+    images: ["/images/logo/logo.png"],
+  },
 };
 
 const RULES = [
@@ -55,8 +82,9 @@ export default function RulesPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-black text-white pt-24 sm:pt-32 pb-24 w-full overflow-x-clip">
-        
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-20">
+          <Breadcrumbs items={[{ name: "Studio Rules" }]} />
+
           <FadeUp>
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />
@@ -65,6 +93,9 @@ export default function RulesPage() {
               </span>
             </div>
             <h1 className="text-4xl xs:text-5xl sm:text-7xl lg:text-8xl font-heading font-extralight sm:font-thin uppercase tracking-tight leading-[0.9] text-white max-w-4xl mb-8">
+              <span className="block text-dk-yellow text-xs sm:text-sm font-mono font-normal tracking-widest mb-2">
+                DK DANCE COMPANY CODE
+              </span>
               Rules & Regulations
             </h1>
             <p className="text-xl sm:text-2xl text-neutral-300 font-light max-w-3xl leading-relaxed">

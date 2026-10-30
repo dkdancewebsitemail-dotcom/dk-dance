@@ -96,7 +96,7 @@ export function DanceStylesSection({
               <div className="relative aspect-[4/5] w-full bg-neutral-900 overflow-hidden">
                 <Image
                   src={style.image}
-                  alt={style.name}
+                  alt={`DK Dance Company ${style.name} class training`}
                   fill
                   className="object-cover object-center transition-all duration-500"
                   sizes="100vw"
@@ -201,7 +201,7 @@ export function DanceStylesSection({
               >
                 <Image
                   src={style.image}
-                  alt={style.name}
+                  alt={`DK Dance Company ${style.name} class training`}
                   fill
                   className="object-cover object-center transition-all duration-700"
                   sizes="(max-width: 1024px) 100vw, 40vw"

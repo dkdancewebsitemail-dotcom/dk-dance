@@ -3,11 +3,12 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, ArrowUpRight, MessageCircle, Phone } from "lucide-react";
+import { MapPin, ArrowUpRight, Phone } from "lucide-react";
 import { FadeUp } from "@/components/ui/Motion";
 import { Branch } from "@/types";
 import { formatWhatsAppUrl } from "@/lib/utils";
 import { ExpandableText } from "@/components/ui/ExpandableText";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppButton";
 
 interface BranchesSectionProps {
   branches: Branch[];
@@ -36,7 +37,7 @@ export function BranchesSection({ branches, showAll = false }: BranchesSectionPr
   return (
     <section className="bg-black text-white py-28 sm:py-36 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-20">
           <div>
             <FadeUp>
@@ -70,7 +71,7 @@ export function BranchesSection({ branches, showAll = false }: BranchesSectionPr
                     {branch.imageUrl ? (
                       <Image
                         src={branch.imageUrl}
-                        alt={`${branch.name} branch of DK Dance Company`}
+                        alt={`DK Dance Company ${branch.name} dance studio in ${branch.city}, ${branch.country}`}
                         fill
                         className="object-cover object-center group-hover:scale-105 transition-all duration-700 ease-out"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -176,15 +177,16 @@ export function BranchesSection({ branches, showAll = false }: BranchesSectionPr
                           <Phone className="w-3.5 h-3.5" />
                         </a>
 
-                        {/* WhatsApp Button */}
+                        {/* WhatsApp Button - Minimalistic Official Green */}
                         <a
                           href={whatsappUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`Enquire via WhatsApp for ${branch.name}`}
-                          className="p-2.5 rounded-full border border-white/10 text-neutral-400 hover:text-[#25D366] hover:border-[#25D366]/40 hover:bg-[#25D366]/10 transition-all duration-200 hover:scale-110 active:scale-95"
+                          title={`WhatsApp: ${branch.whatsapp || "919995272083"}`}
+                          className="p-2.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white transition-all duration-200 hover:scale-110 active:scale-95 inline-flex items-center justify-center shadow-sm"
                         >
-                          <MessageCircle className="w-3.5 h-3.5" />
+                          <WhatsAppIcon className="w-3.5 h-3.5 fill-white" />
                         </a>
 
                         <Link
