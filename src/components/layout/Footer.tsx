@@ -220,17 +220,6 @@ export function Footer({ settings }: { settings?: SiteSettings }) {
           <div>
             © {currentYear} DK Dance Company (DKDC). All rights reserved.
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <Link href="/privacy" className="hover:text-neutral-300 transition-colors duration-150 py-1">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-neutral-300 transition-colors duration-150 py-1">
-              Terms & Conditions
-            </Link>
-            <Link href="/admin/login" className="hover:text-neutral-300 transition-colors duration-150 py-1">
-              Admin Access
-            </Link>
-          </div>
         </div>
       </div>
     </footer>
