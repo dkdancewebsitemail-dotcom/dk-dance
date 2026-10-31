@@ -216,18 +216,6 @@ export function Navbar() {
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="fixed inset-0 h-[100dvh] max-h-[100dvh] w-full z-40 bg-black flex flex-col justify-between px-5 sm:px-8 pt-16 sm:pt-20 pb-4 sm:pb-6 overflow-hidden text-white lg:hidden select-none"
           >
-            {/* Subheader / Directory indicator */}
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-800 shrink-0 relative z-10">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />
-                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-neutral-400 font-mono">
-                  DIRECTORY
-                </span>
-              </div>
-              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-dk-yellow font-mono font-medium">
-                DK DANCE COMPANY
-              </span>
-            </div>
 
             {/* Navigation Links: dynamic auto-distribution to guarantee 100% single screen fit without scrolling */}
             <nav
