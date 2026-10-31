@@ -9,6 +9,7 @@ import { FadeUp } from "@/components/ui/Motion";
 import { Button } from "@/components/ui/Button";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { getSiteSettings, getBranches, getDanceStyles, getCurriculumModules } from "@/lib/db-services";
+import { DEFAULT_CLASS_BATCHES } from "@/lib/constants";
 import { ArrowRight, CheckCircle2, Users, Calendar, Sparkles } from "lucide-react";
 
 export const revalidate = 60;
@@ -52,47 +53,13 @@ export default async function ClassesPage() {
     getCurriculumModules(true),
   ]);
 
-  const batches = [
-    {
-      group: "Juniors / Kids Batch",
-      ageRange: "Ages 4 – 12",
-      badge: "Foundation Level",
-      focus: "Motor coordination, rhythm recognition, posture alignment, basic movement vocabulary, and confidence building.",
-      timings: "Weekend mornings & weekday evening batches",
-      highlights: [
-        "Safe, playful physical development",
-        "Rhythm & beat synchronization",
-        "Stage performance debut in annual showcase",
-        "Personalized instructor guidance",
-      ],
-    },
-    {
-      group: "Teens & Youth Batch",
-      ageRange: "Ages 13 – 17",
-      badge: "Intermediate / Advanced",
-      focus: "Urban hip-hop fundamentals, contemporary floorwork, Bollywood performance conditioning, body isolations, and choreography retention.",
-      timings: "Weekday evenings & Saturday intensives",
-      highlights: [
-        "Style exploration & freestyle agility",
-        "Ensemble coordination & stagecraft",
-        "Competition & championship training",
-        "Advanced flexibility and stamina",
-      ],
-    },
-    {
-      group: "Adults & Working Professionals",
-      ageRange: "Ages 18+",
-      badge: "Open Level & Fitness",
-      focus: "Stress relief, fitness conditioning, lyrical expression, contemporary fluid movement, and creative release in a supportive studio environment.",
-      timings: "Flexible evening & weekend batches",
-      highlights: [
-        "No prior dance experience required",
-        "Cardio conditioning & flexibility",
-        "Body awareness & artistic expression",
-        "Welcoming, non-judgmental atmosphere",
-      ],
-    },
-  ];
+  const batches =
+    settings?.classBatches && settings.classBatches.length > 0
+      ? settings.classBatches
+      : DEFAULT_CLASS_BATCHES;
+
+  const cleanWhatsapp =
+    (settings?.contact?.whatsapp || "").replace(/[^0-9]/g, "") || "919995272083";
 
   const courseSchema = {
     "@context": "https://schema.org",
@@ -214,7 +181,7 @@ export default async function ClassesPage() {
                     </span>
                     <div className="flex items-center gap-3">
                       <a
-                        href={`https://wa.me/${settings?.contact?.whatsapp || "919995272083"}?text=${encodeURIComponent(`Hello DK Dance Company, I would like to enquire about enrolling in the ${b.group} (${b.ageRange}).`)}`}
+                        href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(`Hello DK Dance Company, I would like to enquire about enrolling in the ${b.group} (${b.ageRange}).`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-[11px] font-mono uppercase tracking-wider font-medium transition-all duration-300 shadow-sm hover:shadow-[0_2px_12px_rgba(37,211,102,0.4)] active:scale-95 group"
@@ -317,7 +284,7 @@ export default async function ClassesPage() {
       </main>
 
       <Footer settings={settings} />
-      <WhatsAppButton variant="floating" phone={settings?.contact?.whatsapp} />
+      <WhatsAppButton variant="floating" phone={cleanWhatsapp} />
     </>
   );
 }

@@ -82,6 +82,7 @@ export async function deleteUploadThingFiles(
     console.log(`[UploadThing] Deleting ${keys.length} cloud file(s):`, keys);
     const res = await utapi.deleteFiles(keys);
     console.log("[UploadThing] Cloud deletion result:", res);
+    invalidateStorageUsageCache();
     return res.success;
   } catch (err) {
     console.error("[UploadThing] Error deleting cloud file(s):", err);
@@ -109,32 +110,53 @@ export interface StorageUsageInfo {
   isCritical: boolean; // >= 85% (1.7 GB)
 }
 
+let cachedStorageUsage: { data: StorageUsageInfo; timestamp: number } | null = null;
+const STORAGE_USAGE_CACHE_TTL = 2 * 60 * 1000; // 2 minutes in-memory cache
+
+export function invalidateStorageUsageCache(): void {
+  cachedStorageUsage = null;
+}
+
 /**
  * Fetches real-time cloud storage usage from UploadThing.
  * Free tier limit is 2 GB (2048 MB).
  * Flags warning when usage >= 1 GB (50%).
+ * In-memory cached for 2 minutes to keep admin dashboard responses instant (<50ms).
  */
 export async function getUploadThingStorageUsage(): Promise<StorageUsageInfo> {
   const token = process.env.UPLOADTHING_TOKEN || process.env.UPLOADTHING_SECRET;
   const DEFAULT_LIMIT_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
 
+  const fallbackData: StorageUsageInfo = {
+    totalBytes: 0,
+    totalMb: 0,
+    totalGb: 0,
+    limitBytes: DEFAULT_LIMIT_BYTES,
+    limitGb: 2,
+    percentageUsed: 0,
+    filesUploaded: 0,
+    isWarning: false,
+    isCritical: false,
+  };
+
   if (!token) {
-    return {
-      totalBytes: 0,
-      totalMb: 0,
-      totalGb: 0,
-      limitBytes: DEFAULT_LIMIT_BYTES,
-      limitGb: 2,
-      percentageUsed: 0,
-      filesUploaded: 0,
-      isWarning: false,
-      isCritical: false,
-    };
+    return fallbackData;
+  }
+
+  const now = Date.now();
+  if (cachedStorageUsage && now - cachedStorageUsage.timestamp < STORAGE_USAGE_CACHE_TTL) {
+    return cachedStorageUsage.data;
   }
 
   try {
     const utapi = new UTApi({ token });
-    const usage = await utapi.getUsageInfo();
+    // 1500ms max timeout so external network delays never block the admin dashboard
+    const usagePromise = utapi.getUsageInfo();
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("UploadThing getUsageInfo timeout")), 1500)
+    );
+    const usage = await Promise.race([usagePromise, timeoutPromise]);
+
     const usedBytes = usage.appTotalBytes ?? usage.totalBytes ?? 0;
     const limitBytes = usage.limitBytes || DEFAULT_LIMIT_BYTES;
     const totalMb = Number((usedBytes / (1024 * 1024)).toFixed(2));
@@ -145,7 +167,7 @@ export async function getUploadThingStorageUsage(): Promise<StorageUsageInfo> {
       Number(((usedBytes / limitBytes) * 100).toFixed(1))
     );
 
-    return {
+    const result: StorageUsageInfo = {
       totalBytes: usedBytes,
       totalMb,
       totalGb,
@@ -156,22 +178,18 @@ export async function getUploadThingStorageUsage(): Promise<StorageUsageInfo> {
       isWarning: usedBytes >= 1024 * 1024 * 1024 || percentageUsed >= 50,
       isCritical: percentageUsed >= 85,
     };
+
+    cachedStorageUsage = { data: result, timestamp: now };
+    return result;
   } catch (err) {
     console.warn(
-      "[UploadThing] Could not fetch live cloud usage info, using fallback:",
+      "[UploadThing] Could not fetch live cloud usage info, using fallback/cached data:",
       err
     );
-    return {
-      totalBytes: 0,
-      totalMb: 0,
-      totalGb: 0,
-      limitBytes: DEFAULT_LIMIT_BYTES,
-      limitGb: 2,
-      percentageUsed: 0,
-      filesUploaded: 0,
-      isWarning: false,
-      isCritical: false,
-    };
+    if (cachedStorageUsage) {
+      return cachedStorageUsage.data;
+    }
+    return fallbackData;
   }
 }
 

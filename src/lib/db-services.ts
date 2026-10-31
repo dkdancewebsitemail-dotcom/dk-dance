@@ -443,6 +443,10 @@ export async function getMedia(
   category?: string,
   mediaType: "image" | "video" | "all" = "all"
 ): Promise<MediaItem[]> {
+  const cacheKey = `media_${category || "all"}_${mediaType}`;
+  const cached = getFromCache<MediaItem[]>(cacheKey);
+  if (cached) return cached;
+
   const db = await getDb();
   if (!db) {
     let items = memoryMedia;
@@ -475,13 +479,16 @@ export async function getMedia(
         .sort((a, b) => (Number(a.displayOrder) || 1) - (Number(b.displayOrder) || 1));
     }
 
-    return media
+    const result = media
       .map((m) => ({
         ...m,
         displayOrder: Number(m.displayOrder) || 1,
         _id: m._id?.toString(),
       }))
       .sort((a, b) => (Number(a.displayOrder) || 1) - (Number(b.displayOrder) || 1));
+
+    setToCache(cacheKey, result);
+    return result;
   } catch (err) {
     console.error("Error fetching media:", err);
     resetDbClient();
@@ -495,6 +502,10 @@ export async function getVideos(options?: {
   onlyPublished?: boolean;
   onlyFeatured?: boolean;
 }): Promise<MediaItem[]> {
+  const cacheKey = `videos_${options?.onlyPublished !== false}_${Boolean(options?.onlyFeatured)}`;
+  const cached = getFromCache<MediaItem[]>(cacheKey);
+  if (cached) return cached;
+
   const db = await getDb();
   const query: any = { type: "video" };
   if (options?.onlyPublished !== false) {
@@ -585,6 +596,8 @@ export async function createMedia(data: Omit<MediaItem, "_id">): Promise<MediaIt
     const result = await db.collection("media").insertOne(item as any);
     const insertedId = result.insertedId.toString();
     await reorderCollectionItems("media", insertedId, item.displayOrder);
+    invalidateCache("media");
+    invalidateCache("videos");
     return {
       ...item,
       _id: insertedId,
@@ -645,7 +658,12 @@ export async function updateMedia(
     if (updateData.displayOrder !== undefined) {
       await reorderCollectionItems("media", id, updateData.displayOrder);
     }
-    return result.matchedCount > 0;
+    if (result.matchedCount > 0) {
+      invalidateCache("media");
+      invalidateCache("videos");
+      return true;
+    }
+    return false;
   } catch (err) {
     console.error("Error updating media:", err);
     throw err;
@@ -685,6 +703,8 @@ export async function deleteMedia(id: string): Promise<MediaItem | null> {
     const result = await db.collection("media").deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount > 0) {
       await resequenceCollection("media");
+      invalidateCache("media");
+      invalidateCache("videos");
       deleteUploadThingFiles([
         item.key,
         item.url,
@@ -709,6 +729,10 @@ export async function deleteMedia(id: string): Promise<MediaItem | null> {
 // ENQUIRIES
 // ==========================================
 export async function getEnquiries(): Promise<Enquiry[]> {
+  const cacheKey = "enquiries";
+  const cached = getFromCache<Enquiry[]>(cacheKey);
+  if (cached) return cached;
+
   const db = await getDb();
   if (!db) {
     return [...memoryEnquiries].sort(
@@ -724,10 +748,12 @@ export async function getEnquiries(): Promise<Enquiry[]> {
       .sort({ createdAt: -1 })
       .toArray();
 
-    return enquiries.map((e) => ({
+    const result = enquiries.map((e) => ({
       ...e,
       _id: e._id?.toString(),
     }));
+    setToCache(cacheKey, result, 20000);
+    return result;
   } catch (err) {
     console.error("Error fetching enquiries:", err);
     resetDbClient();
@@ -762,6 +788,7 @@ export async function createEnquiry(
 
   try {
     const result = await db.collection("enquiries").insertOne(item as any);
+    invalidateCache("enquiries");
     return {
       ...item,
       _id: result.insertedId.toString(),
@@ -801,7 +828,11 @@ export async function updateEnquiryStatus(
         { _id: new ObjectId(id) },
         { $set: { status, updatedAt: now } }
       );
-    return result.matchedCount > 0;
+    if (result.matchedCount > 0) {
+      invalidateCache("enquiries");
+      return true;
+    }
+    return false;
   } catch (err) {
     console.error("Error updating enquiry:", err);
     throw err;
@@ -826,7 +857,11 @@ export async function deleteEnquiry(id: string): Promise<boolean> {
     const result = await db
       .collection("enquiries")
       .deleteOne({ _id: new ObjectId(id) });
-    return result.deletedCount > 0;
+    if (result.deletedCount > 0) {
+      invalidateCache("enquiries");
+      return true;
+    }
+    return false;
   } catch (err) {
     console.error("Error deleting enquiry:", err);
     throw err;
@@ -1137,6 +1172,10 @@ export async function updateAdminUser(
 // DANCE STYLES
 // ==========================================
 export async function getDanceStyles(onlyActive = false): Promise<DanceStyle[]> {
+  const cacheKey = `dance_styles_${onlyActive}`;
+  const cached = getFromCache<DanceStyle[]>(cacheKey);
+  if (cached) return cached;
+
   const db = await getDb();
   if (!db) {
     let items = memoryDanceStyles;
@@ -1167,13 +1206,16 @@ export async function getDanceStyles(onlyActive = false): Promise<DanceStyle[]> 
       .find(query)
       .toArray();
 
-    return styles
+    const result = styles
       .map((s) => ({
         ...s,
         displayOrder: Number(s.displayOrder) || 1,
         _id: s._id?.toString(),
       }))
       .sort((a, b) => (Number(a.displayOrder) || 1) - (Number(b.displayOrder) || 1));
+
+    setToCache(cacheKey, result);
+    return result;
   } catch (err) {
     console.error("Error fetching dance styles:", err);
     resetDbClient();
@@ -1249,6 +1291,7 @@ export async function createDanceStyle(data: Omit<DanceStyle, "_id">): Promise<D
     const result = await db.collection("dance_styles").insertOne(styleToInsert as any);
     const insertedId = result.insertedId.toString();
     await reorderCollectionItems("dance_styles", insertedId, styleToInsert.displayOrder);
+    invalidateCache("dance_styles");
     return {
       ...styleToInsert,
       _id: insertedId,
@@ -1301,7 +1344,11 @@ export async function updateDanceStyle(id: string, data: Partial<DanceStyle>): P
     if (updateData.displayOrder !== undefined) {
       await reorderCollectionItems("dance_styles", id, updateData.displayOrder);
     }
-    return result.matchedCount > 0;
+    if (result.matchedCount > 0) {
+      invalidateCache("dance_styles");
+      return true;
+    }
+    return false;
   } catch (err) {
     console.error("Error updating dance style:", err);
     throw err;
@@ -1337,6 +1384,7 @@ export async function deleteDanceStyle(id: string): Promise<boolean> {
     const result = await db.collection("dance_styles").deleteOne(query);
     if (result.deletedCount > 0) {
       await resequenceCollection("dance_styles");
+      invalidateCache("dance_styles");
       deleteUploadThingFiles([style.imageKey, style.image]).catch((err) => {
         console.warn("Failed to delete UploadThing file after dance style deletion:", err);
       });
@@ -1353,6 +1401,10 @@ export async function deleteDanceStyle(id: string): Promise<boolean> {
 // CURRICULUM MODULES
 // ==========================================
 export async function getCurriculumModules(onlyActive = false): Promise<CurriculumModule[]> {
+  const cacheKey = `curriculum_${onlyActive}`;
+  const cached = getFromCache<CurriculumModule[]>(cacheKey);
+  if (cached) return cached;
+
   const db = await getDb();
   if (!db) {
     let items = memoryCurriculum;
@@ -1384,13 +1436,16 @@ export async function getCurriculumModules(onlyActive = false): Promise<Curricul
       .find(query)
       .toArray();
 
-    return modules
+    const result = modules
       .map((m) => ({
         ...m,
         displayOrder: Number(m.displayOrder) || 1,
         _id: m._id?.toString(),
       }))
       .sort((a, b) => (Number(a.displayOrder) || 1) - (Number(b.displayOrder) || 1));
+
+    setToCache(cacheKey, result);
+    return result;
   } catch (err) {
     console.error("Error fetching curriculum modules:", err);
     resetDbClient();
@@ -1431,6 +1486,7 @@ export async function createCurriculumModule(data: Omit<CurriculumModule, "_id">
     const result = await db.collection("curriculum").insertOne(moduleToInsert as any);
     const insertedId = result.insertedId.toString();
     await reorderCollectionItems("curriculum", insertedId, moduleToInsert.displayOrder);
+    invalidateCache("curriculum");
     return {
       ...moduleToInsert,
       _id: insertedId,
@@ -1484,7 +1540,11 @@ export async function updateCurriculumModule(id: string, data: Partial<Curriculu
     if (updateData.displayOrder !== undefined) {
       await reorderCollectionItems("curriculum", id, updateData.displayOrder);
     }
-    return result.matchedCount > 0;
+    if (result.matchedCount > 0) {
+      invalidateCache("curriculum");
+      return true;
+    }
+    return false;
   } catch (err) {
     console.error("Error updating curriculum module:", err);
     throw err;
@@ -1510,8 +1570,10 @@ export async function deleteCurriculumModule(id: string): Promise<boolean> {
     const result = await db.collection("curriculum").deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount > 0) {
       await resequenceCollection("curriculum");
+      invalidateCache("curriculum");
+      return true;
     }
-    return result.deletedCount > 0;
+    return false;
   } catch (err) {
     console.error("Error deleting curriculum module:", err);
     throw err;
@@ -1531,6 +1593,10 @@ const GOOGLE_AVATAR_COLORS = [
 ];
 
 export async function getReviews(onlyPublished: boolean = false): Promise<ReviewItem[]> {
+  const cacheKey = `reviews_${onlyPublished}`;
+  const cached = getFromCache<ReviewItem[]>(cacheKey);
+  if (cached) return cached;
+
   const db = await getDb();
   if (!db) {
     const list = onlyPublished ? memoryReviews.filter((r) => r.published !== false) : memoryReviews;
@@ -1563,13 +1629,16 @@ export async function getReviews(onlyPublished: boolean = false): Promise<Review
       .find(query)
       .toArray();
 
-    return reviews
+    const result = reviews
       .map((r) => ({
         ...r,
         displayOrder: Number(r.displayOrder) || 1,
         _id: r._id?.toString(),
       }))
       .sort((a, b) => (Number(a.displayOrder) || 1) - (Number(b.displayOrder) || 1));
+
+    setToCache(cacheKey, result);
+    return result;
   } catch (err) {
     console.error("Error fetching reviews:", err);
     resetDbClient();
@@ -1633,6 +1702,7 @@ export async function createReview(data: Omit<ReviewItem, "_id">): Promise<Revie
     const result = await db.collection("reviews").insertOne(reviewDoc as any);
     const insertedId = result.insertedId.toString();
     await reorderCollectionItems("reviews", insertedId, reviewDoc.displayOrder);
+    invalidateCache("reviews");
     return {
       ...reviewDoc,
       _id: insertedId,
@@ -1685,7 +1755,11 @@ export async function updateReview(id: string, data: Partial<ReviewItem>): Promi
     if (updateData.displayOrder !== undefined) {
       await reorderCollectionItems("reviews", id, updateData.displayOrder);
     }
-    return result.matchedCount > 0;
+    if (result.matchedCount > 0) {
+      invalidateCache("reviews");
+      return true;
+    }
+    return false;
   } catch (err) {
     console.error("Error updating review:", err);
     throw err;
@@ -1711,8 +1785,10 @@ export async function deleteReview(id: string): Promise<boolean> {
     const result = await db.collection("reviews").deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount > 0) {
       await resequenceCollection("reviews");
+      invalidateCache("reviews");
+      return true;
     }
-    return result.deletedCount > 0;
+    return false;
   } catch (err) {
     console.error("Error deleting review:", err);
     throw err;

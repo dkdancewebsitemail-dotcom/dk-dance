@@ -8,6 +8,7 @@ import {
   Inbox,
   Sparkles,
   GraduationCap,
+  Banknote,
   Star,
   HardDrive,
   AlertTriangle,
@@ -23,6 +24,7 @@ import {
   getDanceStyles,
   getCurriculumModules,
   getReviews,
+  getSiteSettings,
 } from "@/lib/db-services";
 import { getUploadThingStorageUsage } from "@/lib/uploadthing-server";
 import { formatDate } from "@/lib/utils";
@@ -43,6 +45,7 @@ export default async function AdminDashboardPage() {
     curriculum,
     reviews,
     storageUsage,
+    settings,
   ] = await Promise.all([
     getBranches(),
     getMedia(),
@@ -51,6 +54,7 @@ export default async function AdminDashboardPage() {
     getCurriculumModules(),
     getReviews(),
     getUploadThingStorageUsage(),
+    getSiteSettings(),
   ]);
 
   const publishedReviews = reviews.filter(
@@ -183,6 +187,31 @@ export default async function AdminDashboardPage() {
                 className="text-[11px] font-mono uppercase text-neutral-500 hover:text-white mt-2 sm:mt-3 inline-block"
               >
                 Manage curriculum →
+              </Link>
+            </div>
+          </div>
+
+          <div className="p-4 sm:p-6 bg-neutral-950 border border-neutral-800 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <span className="text-xs font-mono uppercase text-neutral-400">
+                Classes & Fees
+              </span>
+              <Banknote className="w-4 h-4 text-dk-yellow" />
+            </div>
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl sm:text-4xl font-heading font-extralight text-white">
+                  {settings?.fees?.weeklyOneClassFee ? settings.fees.weeklyOneClassFee.split("/")[0].trim() : "₹500"}
+                </span>
+                <span className="text-xs font-mono text-neutral-500">
+                  / month ({settings?.classBatches?.length || 3} batches)
+                </span>
+              </div>
+              <Link
+                href="/admin/classes"
+                className="text-[11px] font-mono uppercase text-neutral-500 hover:text-dk-yellow mt-2 sm:mt-3 inline-block"
+              >
+                Manage fees & batches →
               </Link>
             </div>
           </div>
