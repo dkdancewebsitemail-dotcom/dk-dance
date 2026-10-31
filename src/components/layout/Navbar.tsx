@@ -67,11 +67,11 @@ export function Navbar() {
 
   return (
     <>
-      {/* Spacious, Elegant, Transparent Navbar */}
+      {/* Spacious, Elegant Navbar */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           mobileMenuOpen
-            ? "bg-transparent py-3 sm:py-5 px-4 sm:px-8 lg:px-14 text-white"
+            ? "bg-black border-b border-neutral-800/80 py-3 sm:py-4 px-4 sm:px-8 text-white"
             : isScrolled
             ? "bg-neutral-950/90 backdrop-blur-2xl border-b border-white/[0.08] py-3.5 sm:py-4.5 px-4 sm:px-8 lg:px-14 text-white"
             : isLightHero
@@ -121,18 +121,18 @@ export function Navbar() {
                   src="/images/logo/logo.png"
                   alt="DK Dance Company"
                   fill
-                  priority
+                  sizes="(max-width: 640px) 210px, (max-width: 1024px) 290px, 320px"
                   className="object-contain object-left"
-                  sizes="(max-width: 640px) 160px, (max-width: 768px) 224px, 256px"
+                  priority
                 />
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation Links - Pure Clean Typography with Subtle Hairline Indicator */}
+          {/* Desktop Navigation */}
           <nav
             aria-label="Main Navigation"
-            className="hidden lg:flex items-center gap-6 xl:gap-8"
+            className="hidden lg:flex items-center gap-7 xl:gap-9 text-xs uppercase tracking-widest font-mono"
           >
             {NAV_LINKS.map((link) => {
               const isActive =
@@ -144,8 +144,10 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-[13px] sm:text-sm font-light tracking-wide transition-all duration-200 relative py-1 group/nav ${
-                    isLightHero
+                  className={`relative py-1.5 transition-colors duration-200 group/nav ${
+                    isActive
+                      ? "text-dk-yellow font-semibold"
+                      : isLightHero
                       ? isActive
                         ? "text-black font-medium"
                         : "text-neutral-700 hover:text-black"
@@ -187,7 +189,7 @@ export function Navbar() {
               aria-expanded={mobileMenuOpen}
               className={`lg:hidden relative z-50 p-2.5 rounded-full transition-all duration-300 focus:outline-none hover:scale-105 active:scale-95 ${
                 mobileMenuOpen
-                  ? "bg-neutral-800/90 border border-white/25 text-white hover:bg-dk-yellow hover:text-black hover:border-dk-yellow shadow-[0_0_20px_rgba(255,241,2,0.3)] ring-2 ring-white/10"
+                  ? "bg-neutral-800 border border-white/30 text-white hover:bg-dk-yellow hover:text-black hover:border-dk-yellow shadow-[0_0_20px_rgba(255,241,2,0.3)] ring-2 ring-white/10"
                   : isLightHero
                   ? "bg-black/[0.06] hover:bg-black/[0.12] border border-black/10 text-neutral-900"
                   : "bg-white/[0.08] hover:bg-white/[0.14] border border-white/10 text-white hover:text-dk-yellow"
@@ -203,30 +205,26 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Drawer Menu with Smooth Framer Motion Entrance & Exit */}
+      {/* Mobile Drawer Menu: 100% Solid Pitch Black Background, Zero Bleed / Blur */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
             key="mobile-nav-drawer"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 h-[100dvh] max-h-[100dvh] w-full z-40 bg-neutral-950/98 backdrop-blur-2xl flex flex-col justify-between px-5 sm:px-8 pt-16 sm:pt-20 pb-4 sm:pb-6 overflow-hidden text-white lg:hidden select-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-0 h-[100dvh] max-h-[100dvh] w-full z-40 bg-black flex flex-col justify-between px-5 sm:px-8 pt-16 sm:pt-20 pb-4 sm:pb-6 overflow-hidden text-white lg:hidden select-none"
           >
-            {/* Ambient Background Glows */}
-            <div className="pointer-events-none absolute -top-28 -right-28 w-72 h-72 rounded-full bg-dk-yellow/[0.07] blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-28 -left-28 w-72 h-72 rounded-full bg-dk-red/[0.06] blur-3xl" />
-
             {/* Subheader / Directory indicator */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08] shrink-0 relative z-10">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-800 shrink-0 relative z-10">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-dk-yellow animate-pulse" />
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-neutral-400 font-mono">
                   DIRECTORY
                 </span>
               </div>
-              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-dk-yellow font-mono">
+              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-dk-yellow font-mono font-medium">
                 DK DANCE COMPANY
               </span>
             </div>
@@ -245,11 +243,11 @@ export function Navbar() {
                 return (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, x: -14 }}
+                    initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
-                      delay: 0.03 + idx * 0.02,
-                      duration: 0.22,
+                      delay: 0.02 + idx * 0.015,
+                      duration: 0.2,
                       ease: "easeOut",
                     }}
                     className="flex-1 min-h-0 flex items-center"
@@ -257,38 +255,37 @@ export function Navbar() {
                     <Link
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`w-full group flex items-center justify-between py-1 px-2.5 -mx-2.5 rounded-lg transition-all duration-200 ${
+                      className={`w-full group flex items-center justify-between py-1 px-3 -mx-2.5 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? "bg-white/[0.05] text-dk-yellow shadow-[inset_0_0_12px_rgba(255,241,2,0.06)]"
-                          : "text-neutral-300 hover:text-white hover:bg-white/[0.03]"
+                          ? "bg-neutral-900 text-dk-yellow border-l-2 border-dk-yellow pl-3"
+                          : "text-white hover:text-dk-yellow hover:bg-neutral-900/60"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         <span
-                          className={`font-mono text-[10px] tracking-widest w-4 shrink-0 transition-colors ${
+                          className={`font-mono text-[10px] sm:text-xs tracking-widest w-4 shrink-0 transition-colors ${
                             isActive
-                              ? "text-dk-yellow font-semibold"
-                              : "text-neutral-600 group-hover:text-neutral-400"
+                              ? "text-dk-yellow font-bold"
+                              : "text-neutral-500 group-hover:text-neutral-300"
                           }`}
                         >
                           {idx < 9 ? `0${idx + 1}` : idx + 1}
                         </span>
-                        {isActive && (
-                          <span className="w-1 h-3.5 sm:h-4 rounded-full bg-dk-yellow shadow-[0_0_8px_#FFF102] shrink-0" />
-                        )}
                         <span
-                          className={`text-[clamp(15px,2.2vh,20px)] font-light tracking-tight truncate transition-transform duration-200 group-hover:translate-x-0.5 ${
-                            isActive ? "font-medium text-dk-yellow" : ""
+                          className={`text-[clamp(16px,2.4vh,22px)] font-normal tracking-tight truncate transition-colors duration-200 ${
+                            isActive
+                              ? "font-medium text-dk-yellow"
+                              : "text-white group-hover:text-dk-yellow"
                           }`}
                         >
                           {link.label}
                         </span>
                       </div>
                       <ArrowUpRight
-                        className={`w-3.5 h-3.5 transition-all duration-200 shrink-0 ${
+                        className={`w-4 h-4 transition-all duration-200 shrink-0 ${
                           isActive
                             ? "text-dk-yellow opacity-100"
-                            : "text-neutral-600 opacity-40 group-hover:opacity-100 group-hover:text-dk-yellow group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                            : "text-neutral-500 opacity-60 group-hover:opacity-100 group-hover:text-dk-yellow group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                         }`}
                       />
                     </Link>
@@ -298,11 +295,11 @@ export function Navbar() {
             </nav>
 
             {/* Mobile Footer CTAs: Fixed at bottom, always visible on single screen */}
-            <div className="pt-2 sm:pt-3 border-t border-white/[0.08] flex flex-col gap-2 shrink-0 relative z-10">
+            <div className="pt-2 sm:pt-3 border-t border-neutral-800 flex flex-col gap-2 shrink-0 relative z-10">
               <Link
                 href="/contact"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 sm:py-3 px-5 rounded-full bg-dk-yellow hover:bg-[#fff433] text-neutral-950 font-semibold text-xs uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-[0_4px_20px_rgba(255,241,2,0.25)] transition-all hover:scale-[1.01] active:scale-[0.98]"
+                className="w-full text-center py-2.5 sm:py-3 px-5 rounded-full bg-dk-yellow hover:bg-[#fff433] text-neutral-950 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-[0_4px_20px_rgba(255,241,2,0.25)] transition-all hover:scale-[1.01] active:scale-[0.98]"
               >
                 <span>Enquire Now</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
