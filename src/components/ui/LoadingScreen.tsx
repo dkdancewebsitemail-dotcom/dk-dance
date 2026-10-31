@@ -13,10 +13,13 @@ export function LoadingScreen() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Admin routes do not use the loading screen
-    if (isAdmin) {
-      setIsLoading(false);
-      return;
+    // If the user is already inside the admin console navigating sub-tabs, don't show splash again
+    if (typeof window !== "undefined") {
+      const hasEntered = sessionStorage.getItem("dkdc_admin_loaded");
+      if (hasEntered && isAdmin) {
+        setIsLoading(false);
+        return;
+      }
     }
 
     // Lock body scroll while loading
@@ -24,7 +27,8 @@ export function LoadingScreen() {
     document.body.style.overflow = "hidden";
 
     const startTime = Date.now();
-    const duration = 1200; // 1.2 seconds smooth progression
+    // Exactly 1000ms progression + 200ms fade = 1.2 seconds total smooth entry
+    const duration = 1000;
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -38,22 +42,22 @@ export function LoadingScreen() {
 
       if (ratio >= 1) {
         clearInterval(interval);
-        // Hold briefly at 100% for smooth visual payoff
-        setTimeout(() => {
-          setIsFadingOut(true);
-        }, 180);
+        if (typeof window !== "undefined" && isAdmin) {
+          sessionStorage.setItem("dkdc_admin_loaded", "true");
+        }
+        setIsFadingOut(true);
 
-        // Complete unmount & restore scrolling
+        // Complete unmount & restore scrolling at exactly 1.2s
         setTimeout(() => {
           setIsLoading(false);
           document.body.style.overflow = originalOverflow;
-        }, 750);
+        }, 200);
       }
     }, 25);
 
     // If page is fully ready sooner, boost progress
     const handleWindowLoad = () => {
-      setProgress((prev) => (prev < 90 ? 92 : prev));
+      setProgress((prev) => (prev < 90 ? 95 : prev));
     };
 
     if (typeof window !== "undefined" && document.readyState === "complete") {
@@ -71,8 +75,8 @@ export function LoadingScreen() {
     };
   }, [isAdmin]);
 
-  // Completely omit for admin routes or when loading finishes
-  if (isAdmin || !isLoading) {
+  // Omit when loading finishes
+  if (!isLoading) {
     return null;
   }
 

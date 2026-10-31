@@ -52,9 +52,14 @@ function LoginForm() {
         } catch {}
       }
 
-      success("Signed in successfully. Loading dashboard...", "Authentication Verified");
-      router.push(redirectTo);
-      router.refresh();
+      success("Signed in successfully. Entering dashboard...", "Authentication Verified");
+      // Seamlessly navigate directly to the destination with fresh cookies
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("dkdc_admin_loaded", "true");
+        window.location.href = redirectTo;
+      } else {
+        router.push(redirectTo);
+      }
     } catch (err: any) {
       const msg = err.message || "Invalid credentials.";
       setError(msg);
