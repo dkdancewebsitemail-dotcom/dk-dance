@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.dkdancecompany.com"),
   title: {
-    default: "DK Dance Company | Premier Dance Classes in Kozhikode & UK",
+    default: "Best Dance Academy in Kozhikode | Dance Classes Near Me – DK Dance Company",
     template: "%s | DK Dance Company",
   },
   description:
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://www.dkdancecompany.com",
     siteName: "DK Dance Company",
-    title: "DK Dance Company | Premier Dance Classes in Kozhikode & UK",
+    title: "Best Dance Academy in Kozhikode | Dance Classes Near Me – DK Dance Company",
     description:
       "DK Dance Company offers structured dance training for children, teenagers and adults in Kozhikode, Kerala, with an international branch in Bournemouth, UK and online dance classes.",
     images: [
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "DK Dance Company | Premier Dance Classes in Kozhikode & UK",
+    title: "Best Dance Academy in Kozhikode | Dance Classes Near Me – DK Dance Company",
     description:
       "Structured dance training in Kozhikode, Kerala and Bournemouth, UK. Learn • Train • Perform • Grow.",
     images: ["/images/logo/logo.png"],
