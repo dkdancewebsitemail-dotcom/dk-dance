@@ -1,13 +1,8 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
-
-  experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion"],
-  },
   async headers() {
     return [
       {
@@ -73,27 +68,6 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
-  },
-  webpack(config, { isServer }) {
-    if (isServer) {
-      config.plugins.push({
-        apply(compiler: any) {
-          compiler.hooks.afterEmit.tap("EnsurePagesDirPlugin", () => {
-            const fs = require("fs");
-            const serverDir = path.join(process.cwd(), ".next", "server");
-            const pagesDir = path.join(serverDir, "pages");
-            if (!fs.existsSync(pagesDir)) {
-              fs.mkdirSync(pagesDir, { recursive: true });
-            }
-            const pagesManifest = path.join(serverDir, "pages-manifest.json");
-            if (!fs.existsSync(pagesManifest)) {
-              fs.writeFileSync(pagesManifest, "{}");
-            }
-          });
-        },
-      });
-    }
-    return config;
   },
 };
 
