@@ -193,7 +193,7 @@ export default async function OnlineClassesPage() {
             </p>
           </div>
 
-          <ContactForm branches={branches} danceStyles={danceStyles} defaultMode="online" />
+          <ContactForm branches={branches} danceStyles={danceStyles} defaultMode="online" whatsappNumber={settings?.contact?.whatsapp} />
         </section>
       </main>
 

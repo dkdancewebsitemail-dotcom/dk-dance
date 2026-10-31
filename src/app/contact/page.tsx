@@ -209,7 +209,7 @@ export default async function ContactPage() {
                     Submit Admission Enquiry
                   </h2>
                 </div>
-                <ContactForm branches={branches} danceStyles={danceStyles} />
+                <ContactForm branches={branches} danceStyles={danceStyles} whatsappNumber={settings?.contact?.whatsapp} />
               </FadeUp>
             </div>
           </div>

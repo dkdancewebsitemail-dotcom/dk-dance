@@ -21,6 +21,7 @@ interface MediaUploaderWithPreviewProps {
   fileKey?: string;
   mediaType?: "image" | "video";
   maxSizeMb?: number;
+  aspectRatio?: number;
   onChange: (data: { url: string; key?: string; name?: string; type?: "image" | "video" }) => void;
   onClear?: () => void;
   placeholder?: string;
@@ -32,6 +33,7 @@ export function MediaUploaderWithPreview({
   fileKey = "",
   mediaType = "image",
   maxSizeMb,
+  aspectRatio,
   onChange,
   onClear,
   placeholder = "https://... or /images/...",
@@ -406,7 +408,7 @@ export function MediaUploaderWithPreview({
                   title="Crop & reposition thumbnail image"
                 >
                   <Crop className="w-3.5 h-3.5" />
-                  <span>Crop / Edit</span>
+                  <span>Crop & Adjust</span>
                 </button>
               )}
 
@@ -488,7 +490,7 @@ export function MediaUploaderWithPreview({
           imageUrl={displayUrl}
           onClose={() => setIsCropModalOpen(false)}
           onCropComplete={handleCropComplete}
-          defaultAspect={16 / 9}
+          defaultAspect={aspectRatio}
         />
       )}
     </div>

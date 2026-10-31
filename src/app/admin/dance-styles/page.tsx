@@ -609,6 +609,7 @@ export default function AdminDanceStylesPage() {
           {/* Style Cover Image with UploadThing preview */}
           <MediaUploaderWithPreview
             label="Style High-Resolution Imagery"
+            aspectRatio={4 / 3}
             value={formData.image}
             fileKey={formData.imageKey}
             onChange={({ url, key }) => {

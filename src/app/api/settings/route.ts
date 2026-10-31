@@ -42,11 +42,13 @@ export async function PATCH(req: NextRequest) {
     revalidatePath("/", "layout");
     revalidatePath("/");
     revalidatePath("/about");
+    revalidatePath("/classes");
     revalidatePath("/reviews");
     revalidatePath("/contact");
     revalidatePath("/dance-styles");
     revalidatePath("/branches");
     revalidatePath("/gallery");
+    revalidatePath("/videos");
 
     return NextResponse.json({
       success: true,

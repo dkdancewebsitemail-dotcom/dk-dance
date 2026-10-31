@@ -570,6 +570,7 @@ export default function AdminVideosPage() {
           
           <MediaUploaderWithPreview
             label="Video Poster / Thumbnail Photo (Optional, Max 10 MB)"
+            aspectRatio={16 / 9}
             value={formData.thumbnailUrl}
             fileKey={formData.thumbnailKey}
             mediaType="image"

@@ -1,4 +1,49 @@
-import { Branch, SiteSettings, MediaItem, ReviewItem } from "@/types";
+import { Branch, SiteSettings, MediaItem, ReviewItem, ClassBatch } from "@/types";
+
+export const DEFAULT_CLASS_BATCHES: ClassBatch[] = [
+  {
+    id: "batch-kids",
+    group: "Juniors / Kids Batch",
+    ageRange: "Ages 4 – 12",
+    badge: "Foundation Level",
+    focus: "Motor coordination, rhythm recognition, posture alignment, basic movement vocabulary, and confidence building.",
+    timings: "Weekend mornings & weekday evening batches",
+    highlights: [
+      "Safe, playful physical development",
+      "Rhythm & beat synchronization",
+      "Stage performance debut in annual showcase",
+      "Personalized instructor guidance",
+    ],
+  },
+  {
+    id: "batch-teens",
+    group: "Teens & Youth Batch",
+    ageRange: "Ages 13 – 17",
+    badge: "Intermediate / Advanced",
+    focus: "Urban hip-hop fundamentals, contemporary floorwork, Bollywood performance conditioning, body isolations, and choreography retention.",
+    timings: "Weekday evenings & Saturday intensives",
+    highlights: [
+      "Style exploration & freestyle agility",
+      "Ensemble coordination & stagecraft",
+      "Competition & championship training",
+      "Advanced flexibility and stamina",
+    ],
+  },
+  {
+    id: "batch-adults",
+    group: "Adults & Working Professionals",
+    ageRange: "Ages 18+",
+    badge: "Open Level & Fitness",
+    focus: "Stress relief, fitness conditioning, lyrical expression, contemporary fluid movement, and creative release in a supportive studio environment.",
+    timings: "Flexible evening & weekend batches",
+    highlights: [
+      "No prior dance experience required",
+      "Cardio conditioning & flexibility",
+      "Body awareness & artistic expression",
+      "Welcoming, non-judgmental atmosphere",
+    ],
+  },
+];
 
 export const INITIAL_SITE_SETTINGS: SiteSettings = {
   siteName: "DK Dance Company",
@@ -21,6 +66,7 @@ export const INITIAL_SITE_SETTINGS: SiteSettings = {
     paymentNote:
       "Monthly fees should be paid on or before the 10th of every month.",
   },
+  classBatches: DEFAULT_CLASS_BATCHES,
   onlineClasses: {
     headline: "Learn dance from anywhere in the world",
     description:

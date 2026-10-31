@@ -18,20 +18,23 @@ interface ContactFormProps {
   danceStyles?: DanceStyle[];
   defaultBranch?: string;
   defaultMode?: "offline" | "online";
+  whatsappNumber?: string;
 }
 
-const TARGET_WHATSAPP_NUMBER = "919995272083";
-
-function generateWhatsAppUrl(data: {
-  name: string;
-  phone: string;
-  email: string;
-  age?: string;
-  mode: "offline" | "online";
-  branch: string;
-  danceStyle: string;
-  message?: string;
-}): string {
+function generateWhatsAppUrl(
+  data: {
+    name: string;
+    phone: string;
+    email: string;
+    age?: string;
+    mode: "offline" | "online";
+    branch: string;
+    danceStyle: string;
+    message?: string;
+  },
+  destinationPhone: string
+): string {
+  const cleanPhone = destinationPhone.replace(/[^0-9]/g, "") || "919995272083";
   const modeText =
     data.mode === "online" ? "Online Digital Classes" : "Studio Offline Classes";
 
@@ -57,7 +60,7 @@ function generateWhatsAppUrl(data: {
   ];
 
   const fullMessage = messageLines.join("\n");
-  return `https://wa.me/${TARGET_WHATSAPP_NUMBER}?text=${encodeURIComponent(fullMessage)}`;
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(fullMessage)}`;
 }
 
 export function ContactForm({
@@ -65,11 +68,38 @@ export function ContactForm({
   danceStyles = [],
   defaultBranch = "",
   defaultMode = "offline",
+  whatsappNumber = "",
 }: ContactFormProps) {
   const { toast } = useToast();
   const [stylesList, setStylesList] = useState<DanceStyle[]>(
     danceStyles && danceStyles.length > 0 ? danceStyles : []
   );
+
+  // Dynamic WhatsApp number from props or from dynamic /api/settings
+  const [targetWhatsApp, setTargetWhatsApp] = useState<string>(
+    whatsappNumber || "919995272083"
+  );
+
+  useEffect(() => {
+    if (whatsappNumber) {
+      setTargetWhatsApp(whatsappNumber);
+      return;
+    }
+
+    let isMounted = true;
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data?.success && data?.data?.contact?.whatsapp) {
+          setTargetWhatsApp(data.data.contact.whatsapp);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [whatsappNumber]);
 
   useEffect(() => {
     if (danceStyles && danceStyles.length > 0) {
@@ -113,6 +143,12 @@ export function ContactForm({
   const [whatsappRedirectUrl, setWhatsappRedirectUrl] = useState<string>("");
   const [lastSubmitted, setLastSubmitted] = useState<typeof formData | null>(null);
 
+  const cleanDigits = (targetWhatsApp || "").replace(/[^0-9]/g, "") || "919995272083";
+  const displayPhone =
+    cleanDigits.length === 12 && cleanDigits.startsWith("91")
+      ? cleanDigits.slice(2)
+      : cleanDigits;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -127,12 +163,12 @@ export function ContactForm({
 
     setStatus("loading");
 
-    // 1. Build the WhatsApp URL with all autofilled form details
-    const waUrl = generateWhatsAppUrl(formData);
+    // 1. Build the dynamic WhatsApp URL using current configured admin number
+    const waUrl = generateWhatsAppUrl(formData, cleanDigits);
     setWhatsappRedirectUrl(waUrl);
     setLastSubmitted({ ...formData });
 
-    // 2. Open WhatsApp in a new window/tab immediately
+    // 2. Open WhatsApp immediately in new tab
     try {
       if (typeof window !== "undefined") {
         window.open(waUrl, "_blank", "noopener,noreferrer");
@@ -158,7 +194,7 @@ export function ContactForm({
     }
 
     setStatus("success");
-    toast.success("Enquiry received! Opening WhatsApp (+91 99952 72083)...");
+    toast.success(`Enquiry received! Opening WhatsApp (+${cleanDigits})...`);
   };
 
   return (
@@ -182,7 +218,7 @@ export function ContactForm({
           <p className="text-sm text-neutral-300 leading-relaxed mb-6 font-light max-w-md">
             Your admission enquiry has been saved and directed to Director Dhanesh
             Krishnan via WhatsApp (
-            <strong className="text-white font-mono">+91 99952 72083</strong>
+            <strong className="text-white font-mono">+{cleanDigits}</strong>
             ).
           </p>
 
@@ -195,7 +231,7 @@ export function ContactForm({
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-black font-heading font-semibold text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_0_35px_rgba(37,211,102,0.35)] hover:scale-105 active:scale-95 mb-8"
             >
               <MessageCircle className="w-4 h-4 fill-black" />
-              <span>Continue to WhatsApp (+91 99952 72083)</span>
+              <span>Continue to WhatsApp (+{cleanDigits})</span>
               <ExternalLink className="w-3.5 h-3.5 opacity-80" />
             </a>
           )}
@@ -205,7 +241,7 @@ export function ContactForm({
             <div className="w-full text-left p-5 sm:p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs font-mono mb-8 space-y-2.5">
               <div className="text-[11px] uppercase tracking-wider text-dk-yellow pb-2 border-b border-white/[0.08] flex items-center justify-between">
                 <span>Autofilled Message Preview:</span>
-                <span className="text-neutral-500 font-normal">Desk: 9995272083</span>
+                <span className="text-neutral-500 font-normal">Desk: {displayPhone}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-white/[0.04]">
                 <span className="text-neutral-400">Name:</span>
@@ -471,7 +507,7 @@ export function ContactForm({
             />
           </div>
 
-          {/* Submit Button with direct WhatsApp Indicator */}
+          {/* Submit Button with dynamic WhatsApp number display */}
           <button
             type="submit"
             disabled={status === "loading"}
@@ -480,12 +516,12 @@ export function ContactForm({
             {status === "loading" ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin text-black" />
-                <span>Redirecting to WhatsApp (+91 99952 72083)...</span>
+                <span>Redirecting to WhatsApp (+{cleanDigits})...</span>
               </>
             ) : (
               <>
                 <MessageCircle className="w-4 h-4 fill-black" />
-                <span>Submit & Send on WhatsApp</span>
+                <span>Submit & Send on WhatsApp ({displayPhone})</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </>
             )}

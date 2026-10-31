@@ -71,6 +71,16 @@ export interface Enquiry {
   updatedAt?: string;
 }
 
+export interface ClassBatch {
+  id?: string;
+  group: string;
+  ageRange: string;
+  badge: string;
+  focus: string;
+  timings: string;
+  highlights: string[];
+}
+
 export interface SiteSettings {
   _id?: string;
   siteName: string;
@@ -88,6 +98,7 @@ export interface SiteSettings {
     disclaimer: string;
     paymentNote: string;
   };
+  classBatches?: ClassBatch[];
   onlineClasses: {
     headline: string;
     description: string;
@@ -166,4 +177,3 @@ export interface ReviewItem {
   createdAt?: string;
   updatedAt?: string;
 }
-

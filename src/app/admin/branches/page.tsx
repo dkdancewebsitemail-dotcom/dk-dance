@@ -539,6 +539,7 @@ export default function AdminBranchesPage() {
           {/* Studio Image File Upload & Instant Preview */}
           <MediaUploaderWithPreview
             label="Studio Branch Photo"
+            aspectRatio={16 / 9}
             value={formData.imageUrl}
             fileKey={formData.imageKey}
             onChange={({ url, key }) => {
